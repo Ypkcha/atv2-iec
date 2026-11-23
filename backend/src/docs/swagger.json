@@ -1,0 +1,1594 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "LDW Backend API - Task Tracker",
+    "version": "1.0.0",
+    "description": "Documentacao interativa da API REST do Task Tracker"
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Mesmo servidor do Swagger"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Autenticacao de usuarios"
+    },
+    {
+      "name": "Users",
+      "description": "Gerenciamento de usuarios"
+    },
+    {
+      "name": "Projects",
+      "description": "Gerenciamento de projetos"
+    },
+    {
+      "name": "Tasks",
+      "description": "Gerenciamento de tarefas"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Verificar se a API está em execução",
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "API ativa",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "OK",
+                  "mensagem": "Servidor Backend rodando com sucesso.",
+                  "uptime": 120,
+                  "timestamp": "2026-11-22T12:00:00.000Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Realizar login",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "example": {
+                  "mensagem": "Login realizado com sucesso!",
+                  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email e senha sao obrigatorios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais invalidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Listar a própria conta",
+        "tags": ["Users"],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "nome": "Ana Silva",
+                    "email": "ana.silva@email.com",
+                    "createdAt": "2026-09-13T10:00:00.000Z",
+                    "updatedAt": "2026-09-13T10:00:00.000Z"
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Cadastrar novo usuario",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuario criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": 1,
+                  "nome": "Ana Silva",
+                  "email": "ana.silva@email.com",
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados invalidos ou campos ausentes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "E-mail ja cadastrado no sistema",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso ja cadastrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Consultar a própria conta por ID",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": 1,
+                  "nome": "Ana Silva",
+                  "email": "ana.silva@email.com",
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario nao encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "O ID informado deve ser um numero valido."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Atualizar os dados da própria conta",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                },
+                "example": {
+                  "id": 1,
+                  "nome": "Ana Silva",
+                  "email": "ana.silva@email.com",
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario nao encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "O ID informado deve ser um numero valido."
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "E-mail ja esta em uso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Este e-mail ja esta em uso."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Excluir a própria conta por ID",
+        "tags": ["Users"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Usuario removido com sucesso"
+          },
+          "404": {
+            "description": "Usuario nao encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "O ID informado deve ser um numero valido."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/projects": {
+      "get": {
+        "summary": "Listar projetos do usuario autenticado",
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projetos retornados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Project"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "nome": "Projeto Faculdade",
+                    "descricao": "Organizacao das atividades da faculdade",
+                    "user_id": 1,
+                    "createdAt": "2026-09-13T10:00:00.000Z",
+                    "updatedAt": "2026-09-13T10:00:00.000Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar novo projeto",
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Projeto criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                },
+                "example": {
+                  "id": 1,
+                  "nome": "Projeto Faculdade",
+                  "descricao": "Organizacao das atividades da faculdade",
+                  "user_id": 1,
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados invalidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "get": {
+        "summary": "Buscar projeto por ID",
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projeto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                },
+                "example": {
+                  "id": 1,
+                  "nome": "Projeto Faculdade",
+                  "descricao": "Organizacao das atividades da faculdade",
+                  "user_id": 1,
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto nao encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar projeto",
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Projeto atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                },
+                "example": {
+                  "id": 1,
+                  "nome": "Projeto Faculdade",
+                  "descricao": "Organizacao das atividades da faculdade",
+                  "user_id": 1,
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados invalidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto nao encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir projeto",
+        "tags": ["Projects"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Projeto excluido com sucesso"
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto nao encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "summary": "Listar tarefas dos projetos do usuario autenticado",
+        "tags": ["Tasks"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tarefas retornadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Task"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "titulo": "Finalizar atividade de LDW",
+                    "descricao": "Finalizar API do Task Tracker",
+                    "status": "pendente",
+                    "prioridade": "alta",
+                    "project_id": 1,
+                    "createdAt": "2026-09-13T10:00:00.000Z",
+                    "updatedAt": "2026-09-13T10:00:00.000Z"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar nova tarefa",
+        "tags": ["Tasks"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tarefa criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "id": 1,
+                  "titulo": "Finalizar atividade de LDW",
+                  "descricao": "Finalizar API do Task Tracker",
+                  "status": "pendente",
+                  "prioridade": "alta",
+                  "project_id": 1,
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados invalidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Projeto nao encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "summary": "Buscar tarefa por ID",
+        "tags": ["Tasks"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tarefa encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "id": 1,
+                  "titulo": "Finalizar atividade de LDW",
+                  "descricao": "Finalizar API do Task Tracker",
+                  "status": "pendente",
+                  "prioridade": "alta",
+                  "project_id": 1,
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tarefa nao encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar tarefa",
+        "tags": ["Tasks"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTaskDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tarefa atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                },
+                "example": {
+                  "id": 1,
+                  "titulo": "Finalizar atividade de LDW",
+                  "descricao": "Finalizar API do Task Tracker",
+                  "status": "pendente",
+                  "prioridade": "alta",
+                  "project_id": 1,
+                  "createdAt": "2026-09-13T10:00:00.000Z",
+                  "updatedAt": "2026-09-13T10:00:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados invalidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Dados invalidos."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tarefa nao encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir tarefa",
+        "tags": ["Tasks"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tarefa excluida com sucesso"
+          },
+          "401": {
+            "description": "Usuario nao autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Token nao fornecido ou invalido."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tarefa nao encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "erro": "Recurso nao encontrado."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetailResponse"
+                },
+                "example": {
+                  "erro": "Erro interno do servidor",
+                  "detalhe": "Erro interno do servidor"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "example": "Ana Silva"
+          },
+          "email": {
+            "type": "string",
+            "example": "ana.silva@email.com"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-09-13T10:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-09-13T10:00:00.000Z"
+          }
+        }
+      },
+      "CreateUserDTO": {
+        "type": "object",
+        "required": ["nome", "email", "password"],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Ana Silva"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "ana.silva@email.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "123456"
+          }
+        }
+      },
+      "UpdateUserDTO": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Ana Silva Atualizada"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "ana.novo@email.com"
+          }
+        }
+      },
+      "LoginDTO": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "ana.silva@email.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "123456"
+          }
+        }
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "nome": {
+            "type": "string",
+            "example": "Projeto Faculdade"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true,
+            "example": "Organizacao das atividades da faculdade"
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateProjectDTO": {
+        "type": "object",
+        "required": ["nome"],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Projeto Faculdade"
+          },
+          "descricao": {
+            "type": "string",
+            "example": "Organizacao das atividades da faculdade"
+          }
+        }
+      },
+      "UpdateProjectDTO": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "example": "Projeto Faculdade Atualizado"
+          },
+          "descricao": {
+            "type": "string",
+            "example": "Nova descricao do projeto"
+          }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "titulo": {
+            "type": "string",
+            "example": "Finalizar atividade de LDW"
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true,
+            "example": "Finalizar API do Task Tracker"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pendente", "em_andamento", "concluida"],
+            "example": "pendente"
+          },
+          "prioridade": {
+            "type": "string",
+            "enum": ["baixa", "media", "alta"],
+            "example": "alta"
+          },
+          "project_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateTaskDTO": {
+        "type": "object",
+        "required": ["titulo", "project_id"],
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "example": "Finalizar atividade de LDW"
+          },
+          "descricao": {
+            "type": "string",
+            "example": "Finalizar API do Task Tracker"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pendente", "em_andamento", "concluida"],
+            "default": "pendente",
+            "example": "pendente"
+          },
+          "prioridade": {
+            "type": "string",
+            "enum": ["baixa", "media", "alta"],
+            "default": "media",
+            "example": "alta"
+          },
+          "project_id": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "UpdateTaskDTO": {
+        "type": "object",
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "example": "Finalizar atividade de LDW"
+          },
+          "descricao": {
+            "type": "string",
+            "example": "API finalizada e testada"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pendente", "em_andamento", "concluida"],
+            "example": "concluida"
+          },
+          "prioridade": {
+            "type": "string",
+            "enum": ["baixa", "media", "alta"],
+            "example": "alta"
+          },
+          "project_id": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "erro": {
+            "type": "string",
+            "example": "Requisicao invalida"
+          }
+        }
+      },
+      "ErrorDetailResponse": {
+        "type": "object",
+        "properties": {
+          "erro": {
+            "type": "string",
+            "example": "Erro ao processar a requisicao"
+          },
+          "detalhe": {
+            "type": "string",
+            "example": "Descricao tecnica do erro"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "mensagem": {
+            "type": "string",
+            "example": "Login realizado com sucesso!"
+          },
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      }
+    }
+  }
+}

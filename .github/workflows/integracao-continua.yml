@@ -1,0 +1,116 @@
+name: CI/CD - Task Tracker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    name: 1. Qualidade, Tipos e Testes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1.1 Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: 1.2 Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+
+      - name: 1.3 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: 1.4 Instalar dependencias
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+
+      - name: 1.5 Executar ESLint
+        working-directory: backend
+        run: pnpm run lint
+
+      - name: 1.6 Verificar formatacao com Prettier
+        working-directory: backend
+        run: pnpm run format:check
+
+      - name: 1.7 Verificar tipos com TypeScript
+        working-directory: backend
+        run: pnpm run type-check
+
+      - name: 1.8 Executar testes
+        working-directory: backend
+        run: pnpm run test:run
+
+  build:
+    name: 2. Build e Docker
+    runs-on: ubuntu-latest
+    needs: qualidade
+
+    steps:
+      - name: 2.1 Checkout do repositorio
+        uses: actions/checkout@v4
+
+      - name: 2.2 Configurar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+
+      - name: 2.3 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: 2.4 Instalar dependencias
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+
+      - name: 2.5 Compilar backend
+        working-directory: backend
+        run: pnpm run build
+
+      - name: 2.6 Construir imagem Docker
+        run: docker build -t task-tracker-api:test ./backend
+
+  deploy:
+    name: 3. Acionar deploy no Render
+    runs-on: ubuntu-latest
+    needs: [qualidade, build]
+    if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+      - name: Solicitar deploy do commit validado
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [[ -z "$RENDER_DEPLOY_HOOK_URL" ]]; then
+            echo "::error::Configure o secret RENDER_DEPLOY_HOOK_URL no repositório."
+            exit 1
+          fi
+
+          if ! status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+            --max-time 30 --request POST --url-query "ref=$GITHUB_SHA" "$RENDER_DEPLOY_HOOK_URL"); then
+            echo "::error::A chamada ao Deploy Hook do Render falhou."
+            exit 1
+          fi
+
+          case "$status" in
+            200|201) echo "Deploy solicitado para $GITHUB_SHA (HTTP $status)." ;;
+            *) echo "::error::O Deploy Hook retornou HTTP $status."; exit 1 ;;
+          esac

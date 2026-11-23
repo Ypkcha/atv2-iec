@@ -1,0 +1,30 @@
+### Health Check
+GET http://localhost:3000/api/health
+
+### Listar Usuarios
+GET http://localhost:3000/api/users
+
+### Criar Usuario
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+    "nome": "Pedro",
+    "email": "pedro@email.com",
+    "password": "123456"
+}
+
+### Buscar Usuario por ID
+GET http://localhost:3000/api/users/1
+
+### Atualizar Usuario
+PUT http://localhost:3000/api/users/1
+Content-Type: application/json
+
+{
+  "nome": "Pedro Lucas",
+  "email": "pedro@email.com"
+}
+
+### Excluir Usuario
+DELETE http://localhost:3000/api/users/1
