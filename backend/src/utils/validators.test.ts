@@ -104,7 +104,7 @@ describe('Módulo de Validação: validators.ts', () => {
       const input = {
         name: 'Carlos Silva',
         email: 'carlos.silva@fatec.sp.gov.br',
-        role: 'visitante' as any,
+        role: 'visitante' as unknown as UserInput['role'],
       };
 
       // Act
